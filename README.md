@@ -14,4 +14,48 @@ Our solution, OPTILog, aims to optimize logistics operations for efficient inter
 
 To achieve this, OPTILog utilizes the GNU Linear Programming Library to implement optimization algorithms for route planning and resource allocation. Additionally, we develop an interactive Graphical User Interface (GUI) using React.js and Tailwind CSS. This GUI provides users with a seamless experience to interact with the solution, visualize data, and make informed decisions regarding logistics operations.
 
+## Installation
+
+Follow these steps to set up the website locally on your machine:
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/hackfest-dev/HF24-HAck.git
+    ```
+
+2. Change directory to the client folder:
+
+    ```bash
+    cd HF24-HAck/client
+    ```
+
+3. Install dependencies and start the client:
+
+    ```bash
+    npm install
+    npm start
+    ```
+
+4. Open your browser and navigate to [http://localhost:3000](http://localhost:3000) to view the application.
+
+## Running the Flask Server
+
+Follow these steps to run the Flask server:
+
+1. Change directory to the server folder:
+
+    ```bash
+    cd HF24-HAck/server
+    ```
+
+2. Run the Flask server:
+
+    ```bash
+    python server.py
+    ```
+
+3. Open your browser and navigate to [http://127.0.0.1:5000](http://127.0.0.1:5000) to access the server.
+
+
 

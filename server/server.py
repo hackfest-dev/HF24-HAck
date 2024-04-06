@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 import csv
 from geopy.distance import geodesic
+from math import ceil
 
 app = Flask(__name__)
 
 def calculate_distance(port, city):
-    return geodesic(port['position'], city['position']).kilometers
+    return ceil(geodesic(port['position'], city['position']).kilometers)
 
 @app.route('/')
 def hello():
@@ -34,11 +35,16 @@ def save_data():
                     city_writer.writerow([city['name'], city['position'], city['demand']])
             with open('distance.csv', 'w', newline='') as distancefile:
                 distance_writer = csv.writer(distancefile)
-                distance_writer.writerow(['Port', 'City', 'Distance'])
+                # Write header row
+                header_row = [''] + [city['name'] for city in cities]
+                distance_writer.writerow(header_row)
+                # Calculate and write distances for each port
                 for port in ports:
+                    row = [port['name']]
                     for city in cities:
                         distance = calculate_distance(port, city)
-                        distance_writer.writerow([port['name'], city['name'], distance])
+                        row.append(distance)
+                    distance_writer.writerow(row)
 
             return jsonify({"message": "Data received and saved successfully"}), 200
         else:

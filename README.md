@@ -27,26 +27,26 @@ Follow these steps to set up the website locally on your machine:
 2. Change directory to the client folder:
 
     ```bash
-    cd HF24-HAck/client
+    cd client
     ```
 
 3. Install dependencies and start the client:
 
     ```bash
     npm install
-    npm start
+    npm run dev
     ```
 
-4. Open your browser and navigate to [http://localhost:3000](http://localhost:3000) to view the application.
+4. Open your browser and navigate to [http://localhost:5173](http://localhost:5173) to view the application.
 
 ## Running the Flask Server
 
-Follow these steps to run the Flask server:
+Follow these steps to run the Flask server in new terminal:
 
 1. Change directory to the server folder:
 
     ```bash
-    cd HF24-HAck/server
+    cd server
     ```
 
 2. Run the Flask server:

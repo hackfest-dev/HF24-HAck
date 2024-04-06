@@ -1,9 +1,15 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
 import csv
 from geopy.distance import geodesic
 from math import ceil
+import subprocess
+import sys
+python_path = sys.executable
 
 app = Flask(__name__)
+
+CORS(app)
 
 def calculate_distance(port, city):
     return ceil(geodesic(port['position'], city['position']).kilometers)
@@ -49,6 +55,17 @@ def save_data():
             return jsonify({"message": "Data received and saved successfully"}), 200
         else:
             return jsonify({"error": "Missing 'Ports' or 'Cities' key in JSON data"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/download_solution', methods=['GET'])
+def download_solution():
+    try:
+        # Run the flow_model.py script using the Python interpreter
+        subprocess.run([python_path, 'flow_model.py'])
+
+        # Send the solution.csv file as response
+        return send_file('solution.csv', as_attachment=True)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

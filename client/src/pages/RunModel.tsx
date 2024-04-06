@@ -4,9 +4,9 @@ import { useSpring, animated } from "react-spring";
 import backgroundImage from "../assets/modelbg.jpg"; // Path to your background image
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import TabularForm from "@/components/TabularForm";
 import OutputVisualization from "@/components/OutPutVisualisation";
 import Footer from "@/components/Footer";
+import axios from "axios";
 
 interface Port {
   name: string;
@@ -20,11 +20,21 @@ interface City {
   demand: number; // New property to represent demand
 }
 
+interface FormData {
+  Port: string;
+  City: string;
+  Flow: number;
+  Cost_Rs: number;
+  Cost_Dollars: number;
+}
+
 const RunModel: React.FC = () => {
   const [, setScrollY] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
   const [costPerKm, setCostPerKm] = useState<number>(0);
   const [showVisualization, setShowVisualization] = useState(false);
   const [selectedPorts, setSelectedPorts] = useState<Port[]>([]);
+  const [formattedData, setFormattedData] = useState<FormData[]>([]);
   const ports: Port[] = [
     { name: "Kolkata", position: [22.5726, 88.3639], supply: 0 },
     { name: "Haldia", position: [22.025, 88.0583], supply: 0 },
@@ -126,6 +136,70 @@ const RunModel: React.FC = () => {
     from: { opacity: 0 },
     delay: 1000,
   });
+
+  const handleSupplyDemandUpdate = () => {
+    // Prepare data in the specified format
+    const data = {
+      Ports: selectedPorts.map((port) => ({
+        name: port.name,
+        position: port.position,
+        supply: port.supply,
+      })),
+      Cities: selectedCities.map((city) => ({
+        name: city.name,
+        position: city.position,
+        demand: city.demand,
+      })),
+    };
+
+    // Send data to the endpoint
+    axios
+      .post("http://127.0.0.1:5000/save_data", data)
+      .then((response) => {
+        console.log("Data sent successfully:", response.data);
+        // Handle response as needed
+      })
+      .catch((error) => {
+        console.error("Error sending data:", error);
+        // Handle error as needed
+      });
+  };
+
+  const runModel = async () => {
+    setLoading(true); // Set loading state when running the model
+    try {
+      const response = await axios.get(
+        "http://127.0.0.1:5000/download_solution",
+        { responseType: "text" } // Set responseType to 'text' to get the CSV content as a string
+      );
+      const { data } = response;
+
+      // Split the data by lines
+      const lines = data.split("\n");
+
+      // Remove the header line
+      lines.shift();
+
+      // Parse and format the data
+      const formattedDataArray: FormData[] = lines.map((line: string) => {
+        const [Port, City, Flow, Cost_Rs, Cost_Dollars] = line.split(",");
+        return {
+          Port,
+          City,
+          Flow: parseFloat(Flow),
+          Cost_Rs: parseFloat(Cost_Rs),
+          Cost_Dollars: parseFloat(Cost_Dollars),
+        };
+      });
+
+      // Set the formatted data into the state
+      setFormattedData(formattedDataArray);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false); // Reset loading state after the model finishes running
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -289,10 +363,7 @@ const RunModel: React.FC = () => {
       <div className="flex justify-center">
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mt-6"
-          onClick={() => {
-            console.log(selectedPorts);
-            console.log(selectedCities);
-          }}
+          onClick={handleSupplyDemandUpdate}
         >
           Update Supply and Demand
         </button>
@@ -308,7 +379,58 @@ const RunModel: React.FC = () => {
           className="border rounded px-2 py-1"
         />
       </div>
-      <TabularForm />
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="p-6 max-h-96 overflow-y-auto w-full">
+          {!loading && (
+            <div className="flex flex-col items-center">
+              <button
+                onClick={runModel}
+                disabled={loading}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Run Model
+              </button>
+              <p className="text-center mt-2">
+                Click the button to run the model and display the results.
+              </p>
+              <p className="text-center mt-2">
+                This model takes data about ports, cities, demand, supply and
+                Cost Per Km to simulate the flow of goods and calculate shipping
+                costs.
+              </p>
+            </div>
+          )}
+
+          {loading && <p className="text-center">Loading...</p>}
+
+          {formattedData.length !== 0 && (
+            <div>
+              <table className="table-auto w-full">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2">Port</th>
+                    <th className="px-4 py-2">City</th>
+                    <th className="px-4 py-2">Flow</th>
+                    <th className="px-4 py-2">Cost (Rs. in thousands)</th>
+                    <th className="px-4 py-2">Cost ($ in thousands)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formattedData.map((item, index) => (
+                    <tr key={index}>
+                      <td className="border px-4 py-2">{item.Port}</td>
+                      <td className="border px-4 py-2">{item.City}</td>
+                      <td className="border px-4 py-2">{item.Flow}</td>
+                      <td className="border px-4 py-2">{item.Cost_Rs}</td>
+                      <td className="border px-4 py-2">{item.Cost_Dollars}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
       <div className="flex justify-center">
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mt-6"
@@ -317,7 +439,7 @@ const RunModel: React.FC = () => {
           {showVisualization ? "Hide Visualization" : "Show Visualization"}
         </button>
       </div>
-      {showVisualization && <OutputVisualization />}
+      {showVisualization &&  <OutputVisualization data={formattedData} />}
       <Footer />
     </div>
   );

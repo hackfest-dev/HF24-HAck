@@ -1,9 +1,5 @@
 Port,City,Flow,Cost_rs,Cost_dlr
-DeenDayal,Ahmedabad,100.0,0.07,0.001
-Kharagpur,Indore,20.0,40.985,0.5855
-Kharagpur,Nagpur,132.0,29.855,0.4265
-Kharagpur,Varanasi,48.0,19.075,0.2725
-Vizag,Nagpur,18.0,20.265,0.2895
-Vizag,Coimbatore,32.0,35.035,0.5005
-JNPT,Indore,10.0,18.06,0.258
-JNPT,Ahmedabad,50.0,15.855,0.2265
+JNPT,Varanasi,100.0,43.785,0.6255
+Mormugaon,Varanasi,50.0,50.995,0.7285
+Mormugaon,Nagpur,150.0,29.68,0.424
+Vizag,Rourkela,50.0,18.725,0.2675

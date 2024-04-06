@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { Parallax } from "react-parallax";
 import { useSpring, animated } from "react-spring";
-import backgroundImage from "../assets/modelbg.jpg"; // Path to your background image
+import backgroundImage from "../assets/modelbg.jpg"; 
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import OutputVisualization from "@/components/OutPutVisualisation";
 import Footer from "@/components/Footer";
 import axios from "axios";
 
+
 interface Port {
   name: string;
   position: [number, number];
-  supply: number; // New property to represent supply
+  supply: number; 
 }
 
 interface City {
   name: string;
   position: [number, number];
-  demand: number; // New property to represent demand
+  demand: number; 
 }
 
 interface FormData {
@@ -31,7 +32,6 @@ interface FormData {
 const RunModel: React.FC = () => {
   const [, setScrollY] = useState<number>(0);
   const [loading, setLoading] = useState(false);
-  const [costPerKm, setCostPerKm] = useState<number>(0);
   const [showVisualization, setShowVisualization] = useState(false);
   const [selectedPorts, setSelectedPorts] = useState<Port[]>([]);
   const [formattedData, setFormattedData] = useState<FormData[]>([]);
@@ -122,7 +122,6 @@ const RunModel: React.FC = () => {
     setSelectedPorts(updatedPorts);
   };
 
-  // Function to update demand for cities
   const updateCityDemand = (name: string, demand: number) => {
     const updatedCities = selectedCities.map((city) =>
       city.name === name ? { ...city, demand } : city
@@ -130,7 +129,6 @@ const RunModel: React.FC = () => {
     setSelectedCities(updatedCities);
   };
 
-  // Define animations for text
   const textAnimationProps = useSpring({
     opacity: 1,
     from: { opacity: 0 },
@@ -138,7 +136,6 @@ const RunModel: React.FC = () => {
   });
 
   const handleSupplyDemandUpdate = () => {
-    // Prepare data in the specified format
     const data = {
       Ports: selectedPorts.map((port) => ({
         name: port.name,
@@ -152,35 +149,26 @@ const RunModel: React.FC = () => {
       })),
     };
 
-    // Send data to the endpoint
     axios
       .post("http://127.0.0.1:5000/save_data", data)
       .then((response) => {
         console.log("Data sent successfully:", response.data);
-        // Handle response as needed
       })
       .catch((error) => {
         console.error("Error sending data:", error);
-        // Handle error as needed
       });
   };
 
   const runModel = async () => {
-    setLoading(true); // Set loading state when running the model
+    setLoading(true); 
     try {
       const response = await axios.get(
         "http://127.0.0.1:5000/download_solution",
-        { responseType: "text" } // Set responseType to 'text' to get the CSV content as a string
+        { responseType: "text" } 
       );
       const { data } = response;
-
-      // Split the data by lines
       const lines = data.split("\n");
-
-      // Remove the header line
       lines.shift();
-
-      // Parse and format the data
       const formattedDataArray: FormData[] = lines.map((line: string) => {
         const [Port, City, Flow, Cost_Rs, Cost_Dollars] = line.split(",");
         return {
@@ -191,13 +179,11 @@ const RunModel: React.FC = () => {
           Cost_Dollars: parseFloat(Cost_Dollars),
         };
       });
-
-      // Set the formatted data into the state
       setFormattedData(formattedDataArray);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
-      setLoading(false); // Reset loading state after the model finishes running
+      setLoading(false); 
     }
   };
 
@@ -228,6 +214,7 @@ const RunModel: React.FC = () => {
       </Parallax>
 
       <div className="mx-10 md:mx-36 border border-white px-10 md:px-24">
+        
         <h1 className="text-xl md:text-3xl font-semibold text-center underline p-4 md:p-10">
           Input
         </h1>
@@ -367,17 +354,6 @@ const RunModel: React.FC = () => {
         >
           Update Supply and Demand
         </button>
-      </div>
-      <div className="flex justify-center my-16">
-        <label className="text-lg font-semibold mr-2">
-          Cost per Kilometer for Freight Transport:
-        </label>
-        <input
-          type="number"
-          value={costPerKm}
-          onChange={(e) => setCostPerKm(parseInt(e.target.value))}
-          className="border rounded px-2 py-1"
-        />
       </div>
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="p-6 max-h-96 overflow-y-auto w-full">

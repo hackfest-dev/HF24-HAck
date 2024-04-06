@@ -48,14 +48,17 @@ Follow these steps to run the Flask server in new terminal:
     ```bash
     cd server
     ```
-
-2. Run the Flask server:
+2. Install all dependencies:
+    ```
+    pip install requirements.txt
+    ```
+3. Run the Flask server:
 
     ```bash
     python server.py
     ```
 
-3. Open your browser and navigate to [http://127.0.0.1:5000](http://127.0.0.1:5000) to access the server.
+4. Open your browser and navigate to [http://127.0.0.1:5000](http://127.0.0.1:5000) to access the server.
 
 
 
